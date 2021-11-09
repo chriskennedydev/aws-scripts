@@ -1,0 +1,40 @@
+#!/bin/bash
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y ruby build-essential cmake ruby-bundler ruby-dev
+
+cat <<EOF > Gemfile
+source 'https://rubygems.org'
+
+gem 'sinatra'
+gem 'thin'
+gem 'puma'
+gem 'reel'
+gem 'http'
+gem 'webrick'
+EOF
+
+cat <<EOF > server.rb
+require 'sinatra'
+require 'socket'
+
+set :bind, '0.0.0.0'
+get '/' do
+  hostname = Socket.gethostname
+  "#{hostname}"
+end
+
+get '/healthcheck' do
+  'Server is Online!'
+end
+EOF
+
+bundle install
+
+cat <<EOF > run
+#!/bin/bash
+
+bundle exec ruby server.rb
+EOF
+
+chmod u+x run
